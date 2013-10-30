@@ -16,12 +16,12 @@ extern NSString* const kInstagramPhotoFileName;
 //checks to see if user has instagram installed on device
 + (BOOL) isAppInstalled;
 
-//checks to see if image is large enough to be posted by instagram
+//checks to see if image is large enough to be posted by instagram, instagram policy is not to stretch or scale up smaller images
 //returns NO if image dimensions are under 612x612
-//
-//Technically the instagram allows for photos to be published under the size of 612x612
-//BUT if you want nice quality pictures, I recommend checking the image size.
 + (BOOL) isImageCorrectSize:(UIImage*)image;
+
+// Sets the directory where the temp file is stored.
++ (void) setPhotoDirectory:(NSString *)directory;
 
 //post image to instagram by passing in the target image and
 //the view in which the user will be presented with the instagram model

@@ -13,6 +13,8 @@
     UIDocumentInteractionController *documentInteractionController;
 }
 
+@property (nonatomic, strong) NSString *photoDirectory;
+
 + (MGInstagram *)sharedInstance;
 
 @end
@@ -22,30 +24,42 @@
 NSString* const kInstagramAppURLString = @"instagram://app";
 NSString* const kInstagramPhotoFileName = @"tempinstgramphoto.igo";
 
+#pragma mark - Init
+
 + (MGInstagram *)sharedInstance
 {
     static MGInstagram* sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        sharedInstance = [[MGInstagram alloc] init];
+        sharedInstance = [MGInstagram new];
     });
     return sharedInstance;
 }
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        _photoDirectory = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"];
+    }
+
+    return self;
+}
+
+#pragma mark - Public
 
 + (BOOL) isAppInstalled {
     NSURL *appURL = [NSURL URLWithString:kInstagramAppURLString];
     return [[UIApplication sharedApplication] canOpenURL:appURL];
 }
 
-//Technically the instagram allows for photos to be published under the size of 612x612
-//BUT if you want nice quality pictures, I recommend checking the image size.
 + (BOOL) isImageCorrectSize:(UIImage*)image {
     CGImageRef cgImage = [image CGImage];
     return (CGImageGetWidth(cgImage) >= 612 && CGImageGetHeight(cgImage) >= 612);
 }
 
-- (NSString*) photoFilePath {
-    return [NSString stringWithFormat:@"%@/%@",[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"],kInstagramPhotoFileName];
++ (void) setPhotoDirectory:(NSString *)directory {
+    [MGInstagram sharedInstance].photoDirectory = directory;
 }
 
 + (void) postImage:(UIImage*)image inView:(UIView*)view {
@@ -54,6 +68,8 @@ NSString* const kInstagramPhotoFileName = @"tempinstgramphoto.igo";
 + (void) postImage:(UIImage*)image withCaption:(NSString*)caption inView:(UIView*)view {
     [[MGInstagram sharedInstance] postImage:image withCaption:caption inView:view];
 }
+
+#pragma mark - Private
 
 - (void) postImage:(UIImage*)image withCaption:(NSString*)caption inView:(UIView*)view
 {
@@ -69,6 +85,10 @@ NSString* const kInstagramPhotoFileName = @"tempinstgramphoto.igo";
     if (caption)
         documentInteractionController.annotation = [NSDictionary dictionaryWithObject:caption forKey:@"InstagramCaption"];
     [documentInteractionController presentOpenInMenuFromRect:CGRectZero inView:view animated:YES];
+}
+
+- (NSString*) photoFilePath {
+    return [NSString stringWithFormat:@"%@/%@",self.photoDirectory,kInstagramPhotoFileName];
 }
 
 @end
