@@ -43,7 +43,7 @@ NSString* const kInstagramOnlyPhotoFileName = @"tempinstgramphoto.igo";
         self.photoDirectory = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"];
         self.photoFileName = kInstagramOnlyPhotoFileName;
     }
-
+    
     return self;
 }
 
@@ -54,7 +54,7 @@ NSString* const kInstagramOnlyPhotoFileName = @"tempinstgramphoto.igo";
 }
 
 + (NSString*) photoFilePath {
-    return [NSString stringWithFormat:@"%@/%@",[NSHomeDirectory() stringByAppendingPathComponent:self.photoDirectory],self.photoFileName];
+    return [NSString stringWithFormat:@"%@/%@",[NSHomeDirectory() stringByAppendingPathComponent:[MGInstagram sharedInstance].photoDirectory],[MGInstagram sharedInstance].photoFileName];
 }
 
 + (void) setPhotoFileName:(NSString*)fileName {
@@ -90,14 +90,14 @@ NSString* const kInstagramOnlyPhotoFileName = @"tempinstgramphoto.igo";
 #pragma mark - Private
 
 - (void) postImage:(UIImage*)image withCaption:(NSString*)caption inView:(UIView*)view delegate:(id<UIDocumentInteractionControllerDelegate>)delegate {
-
+    
     if (!image) {
         [NSException raise:NSInternalInconsistencyException format:@"Image cannot be nil!"];
     }
-
-    [UIImageJPEGRepresentation(image, 1.0) writeToFile:[self photoFilePath] atomically:YES];
-
-    NSURL *fileURL = [NSURL fileURLWithPath:[self photoFilePath]];
+    
+    [UIImageJPEGRepresentation(image, 1.0) writeToFile:[MGInstagram photoFilePath] atomically:YES];
+    
+    NSURL *fileURL = [NSURL fileURLWithPath:[MGInstagram photoFilePath]];
     documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:fileURL];
     documentInteractionController.UTI = @"com.instagram.exclusivegram";
     documentInteractionController.delegate = delegate;
