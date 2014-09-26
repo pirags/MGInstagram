@@ -8,25 +8,25 @@
 
 #import "MGInstagram.h"
 
-@interface MGInstagram ()
-{
+@interface MGInstagram () {
     UIDocumentInteractionController *documentInteractionController;
 }
 
 @property (nonatomic, strong) NSString *photoDirectory;
+@property (nonatomic, strong) NSString *photoFileName;
 
-+ (MGInstagram *)sharedInstance;
++ (instancetype)sharedInstance;
 
 @end
 
 @implementation MGInstagram
 
 NSString* const kInstagramAppURLString = @"instagram://app";
-NSString* const kInstagramPhotoFileName = @"tempinstgramphoto.igo";
+NSString* const kInstagramOnlyPhotoFileName = @"tempinstgramphoto.igo";
 
 #pragma mark - Init
 
-+ (MGInstagram *)sharedInstance
++ (instancetype) sharedInstance
 {
     static MGInstagram* sharedInstance = nil;
     static dispatch_once_t onceToken;
@@ -40,13 +40,30 @@ NSString* const kInstagramPhotoFileName = @"tempinstgramphoto.igo";
 {
     self = [super init];
     if (self) {
-        _photoDirectory = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"];
+        self.photoDirectory = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"];
+        self.photoFileName = kInstagramOnlyPhotoFileName;
     }
 
     return self;
 }
 
 #pragma mark - Public
+
++ (void) setPhotoDirectory:(NSString *)directory {
+    [MGInstagram sharedInstance].photoDirectory = directory;
+}
+
++ (NSString*) photoFilePath {
+    return [NSString stringWithFormat:@"%@/%@",[NSHomeDirectory() stringByAppendingPathComponent:self.photoDirectory],self.photoFileName];
+}
+
++ (void) setPhotoFileName:(NSString*)fileName {
+    [MGInstagram sharedInstance].photoFileName = fileName;
+}
+
++ (NSString*) photoFileName {
+    return [MGInstagram sharedInstance].photoFileName;
+}
 
 + (BOOL) isAppInstalled {
     NSURL *appURL = [NSURL URLWithString:kInstagramAppURLString];
@@ -58,37 +75,36 @@ NSString* const kInstagramPhotoFileName = @"tempinstgramphoto.igo";
     return (CGImageGetWidth(cgImage) >= 612 && CGImageGetHeight(cgImage) >= 612);
 }
 
-+ (void) setPhotoDirectory:(NSString *)directory {
-    [MGInstagram sharedInstance].photoDirectory = directory;
++ (void) postImage:(UIImage*)image inView:(UIView*)view {
+    [self postImage:image withCaption:nil inView:view];
 }
 
-+ (void) postImage:(UIImage*)image inView:(UIView*)view {
-    [[MGInstagram sharedInstance] postImage:image withCaption:nil inView:view];
-}
 + (void) postImage:(UIImage*)image withCaption:(NSString*)caption inView:(UIView*)view {
-    [[MGInstagram sharedInstance] postImage:image withCaption:caption inView:view];
+    [self postImage:image withCaption:caption inView:view delegate:nil];
+}
+
++ (void) postImage:(UIImage*)image withCaption:(NSString*)caption inView:(UIView*)view delegate:(id<UIDocumentInteractionControllerDelegate>)delegate {
+    [[MGInstagram sharedInstance] postImage:image withCaption:caption inView:view delegate:delegate];
 }
 
 #pragma mark - Private
 
-- (void) postImage:(UIImage*)image withCaption:(NSString*)caption inView:(UIView*)view
-{
-    if (!image)
+- (void) postImage:(UIImage*)image withCaption:(NSString*)caption inView:(UIView*)view delegate:(id<UIDocumentInteractionControllerDelegate>)delegate {
+
+    if (!image) {
         [NSException raise:NSInternalInconsistencyException format:@"Image cannot be nil!"];
-    
+    }
+
     [UIImageJPEGRepresentation(image, 1.0) writeToFile:[self photoFilePath] atomically:YES];
-    
+
     NSURL *fileURL = [NSURL fileURLWithPath:[self photoFilePath]];
     documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:fileURL];
     documentInteractionController.UTI = @"com.instagram.exclusivegram";
-    documentInteractionController.delegate = self;
-    if (caption)
+    documentInteractionController.delegate = delegate;
+    if (caption) {
         documentInteractionController.annotation = [NSDictionary dictionaryWithObject:caption forKey:@"InstagramCaption"];
+    }
     [documentInteractionController presentOpenInMenuFromRect:CGRectZero inView:view animated:YES];
-}
-
-- (NSString*) photoFilePath {
-    return [NSString stringWithFormat:@"%@/%@",self.photoDirectory,kInstagramPhotoFileName];
 }
 
 @end

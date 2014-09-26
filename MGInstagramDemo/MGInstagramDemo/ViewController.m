@@ -55,6 +55,12 @@
     [self postInstagramImage:image];
 }
 
+- (IBAction)postToAllServicesPressed:(id)sender {
+    UIImage *image = [UIImage imageNamed:@"MGInstagramPhotoLarge"];
+    [MGInstagram setPhotoFileName:@"tempphoto.png"];
+    [self postInstagramImage:image];
+    [MGInstagram setPhotoFileName:kInstagramOnlyPhotoFileName];
+}
 
 - (IBAction)incorrectlyPost302InstagramPressed:(id)sender
 {

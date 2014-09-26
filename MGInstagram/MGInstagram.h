@@ -11,7 +11,13 @@
 @interface MGInstagram : NSObject <UIDocumentInteractionControllerDelegate>
 
 extern NSString* const kInstagramAppURLString;
-extern NSString* const kInstagramPhotoFileName;
+extern NSString* const kInstagramOnlyPhotoFileName;
+
+//DEFAULT file name is kInstagramDefualtPhotoFileName
+//DEFAULT file name is restricted to only the instagram app
+//Make sure your photoFileName has a valid photo extension.
++ (void) setPhotoFileName:(NSString*)fileName;
++ (NSString*) photoFileName;
 
 //checks to see if user has instagram installed on device
 + (BOOL) isAppInstalled;
@@ -22,11 +28,13 @@ extern NSString* const kInstagramPhotoFileName;
 
 // Sets the directory where the temp file is stored.
 + (void) setPhotoDirectory:(NSString *)directory;
++ (NSString*) photoFilePath;
 
 //post image to instagram by passing in the target image and
 //the view in which the user will be presented with the instagram model
 + (void) postImage:(UIImage*)image inView:(UIView*)view;
 //Same as above method but with the option for a photo caption
 + (void) postImage:(UIImage*)image withCaption:(NSString*)caption inView:(UIView*)view;
++ (void) postImage:(UIImage*)image withCaption:(NSString*)caption inView:(UIView*)view delegate:(id<UIDocumentInteractionControllerDelegate>)delegate;
 
 @end
