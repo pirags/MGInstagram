@@ -22,7 +22,7 @@
 @implementation MGInstagram
 
 NSString* const kInstagramAppURLString = @"instagram://app";
-NSString* const kInstagramOnlyPhotoFileName = @"tempinstgramphoto.igo";
+NSString* const kInstagramOnlyPhotoFileName = @"tempinstagramphoto.igo";
 
 #pragma mark - Init
 
@@ -54,7 +54,7 @@ NSString* const kInstagramOnlyPhotoFileName = @"tempinstgramphoto.igo";
 }
 
 + (NSString*) photoFilePath {
-    return [NSString stringWithFormat:@"%@/%@",[NSHomeDirectory() stringByAppendingPathComponent:[MGInstagram sharedInstance].photoDirectory],[MGInstagram sharedInstance].photoFileName];
+    return [NSString stringWithFormat:@"%@/%@", [MGInstagram sharedInstance].photoDirectory,[MGInstagram sharedInstance].photoFileName];
 }
 
 + (void) setPhotoFileName:(NSString*)fileName {
@@ -80,7 +80,7 @@ NSString* const kInstagramOnlyPhotoFileName = @"tempinstgramphoto.igo";
 }
 
 + (void) postImage:(UIImage*)image withCaption:(NSString*)caption inView:(UIView*)view {
-    [self postImage:image withCaption:caption inView:view delegate:nil];
+    [self postImage:image withCaption:caption inView:view delegate:[MGInstagram sharedInstance]];
 }
 
 + (void) postImage:(UIImage*)image withCaption:(NSString*)caption inView:(UIView*)view delegate:(id<UIDocumentInteractionControllerDelegate>)delegate {
